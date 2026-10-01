@@ -12,6 +12,9 @@ import {
   labelTanggal,
   tanggalValid,
 } from "@/lib/waktu";
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { logout } from "../login/actions";
 
 const satu = <T,>(x: T | T[] | null | undefined): T | undefined =>
   Array.isArray(x) ? x[0] : (x ?? undefined);
@@ -88,107 +91,185 @@ export default async function Beranda({
     `/?tanggal=${t}${filter ? `&jenis=${filter}` : ""}`;
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-6">
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Deshub: Jadwal Ruang</h1>
-        <Link href="/admin" className="text-sm text-gray-500 hover:underline">
+<main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 md:p-8">
+      {/* Header Utama */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Deshub: Jadwal Ruang
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Monitoring ketersediaan dan penggunaan ruang secara real-time
+          </p>
+        </div>
+        <Link
+          href="/admin"
+          className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+        >
           Masuk admin
         </Link>
-      </header>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={href(geserTanggal(tanggal, -1))}
-          className="rounded-md border px-3 py-2 text-sm hover:bg-gray-100"
-        >
-          ← Sebelumnya
-        </Link>
-        <Link
-          href={href(hariIni())}
-          className="rounded-md border px-3 py-2 text-sm hover:bg-gray-100"
-        >
-          Hari ini
-        </Link>
-        <Link
-          href={href(geserTanggal(tanggal, 1))}
-          className="rounded-md border px-3 py-2 text-sm hover:bg-gray-100"
-        >
-          Berikutnya →
-        </Link>
-      </div>
-
-      <form method="get" className="flex flex-wrap items-end gap-3 text-sm">
-        <label className="space-y-1">
-          <span>Tanggal</span>
-          <input
-            type="date"
-            name="tanggal"
-            defaultValue={tanggal}
-            className="block rounded-md border px-3 py-2"
-          />
-        </label>
-        <label className="space-y-1">
-          <span>Jenis ruang</span>
-          <select
-            name="jenis"
-            defaultValue={filter}
-            className="block rounded-md border px-3 py-2"
-          >
-            <option value="">Semua ruang</option>
-            <option value="UMUM">Ruang umum &amp; teleconference</option>
-            <option value="LAB">Lab komputer</option>
-          </select>
-        </label>
+              <form action={logout}>
         <button className="rounded-md border px-3 py-2 hover:bg-gray-100">
-          Tampilkan
+          Keluar
         </button>
       </form>
+      </header>
 
-      <h2 className="text-lg font-medium">{labelTanggal(tanggal)}</h2>
+      {/* Filter & Navigasi Tanggal */}
+      <div className="sticky top-4 z-10 backdrop-blur">
+        <Card className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Navigasi Cepat */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={href(geserTanggal(tanggal, -1))}
+              className="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              ← Sebelumnya
+            </Link>
+            <Link
+              href={href(hariIni())}
+              className="inline-flex items-center rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            >
+              Hari ini
+            </Link>
+            <Link
+              href={href(geserTanggal(tanggal, 1))}
+              className="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Berikutnya →
+            </Link>
+          </div>
 
-      {!aktif && (
-        <p className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
-          Tanggal ini berada di luar periode akademik, jadi tidak ada jadwal kuliah
-          reguler dan hanya peminjaman yang ditampilkan.
-        </p>
-      )}
-      {aktif && hari === null && (
-        <p className="rounded-md bg-gray-100 p-3 text-sm text-gray-700">
-          Hari Minggu tidak ada jadwal kuliah reguler.
-        </p>
-      )}
+          {/* Form Filter */}
+          <form
+            method="get"
+            className="flex flex-wrap items-center gap-3 text-sm"
+          >
+            <div className="flex items-center gap-2">
+              <label htmlFor="tanggal" className="font-medium text-slate-600">
+                Tanggal:
+              </label>
+              <input
+                id="tanggal"
+                type="date"
+                name="tanggal"
+                defaultValue={tanggal}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-800 focus:border-slate-400 focus:bg-white focus:outline-none"
+              />
+            </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <label htmlFor="jenis" className="font-medium text-slate-600">
+                Jenis:
+              </label>
+              <select
+                id="jenis"
+                name="jenis"
+                defaultValue={filter}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-800 focus:border-slate-400 focus:bg-white focus:outline-none"
+              >
+                <option value="">Semua ruang</option>
+                <option value="UMUM">Ruang umum &amp; teleconference</option>
+                <option value="LAB">Lab komputer</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-200 focus:outline-none"
+            >
+              Tampilkan
+            </button>
+          </form>
+        </Card>
+      </div>
+
+      {/* Info Tanggal & Status Akademik */}
+      <div className="space-y-2">
+        <h2 className="text-xl font-bold tracking-tight text-slate-800">
+          {labelTanggal(tanggal)}
+        </h2>
+
+        {!aktif && (
+          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm text-amber-900">
+            <span className="font-semibold">Info:</span> Tanggal ini berada di
+            luar periode akademik, jadi tidak ada jadwal kuliah reguler dan
+            hanya peminjaman yang ditampilkan.
+          </div>
+        )}
+        {aktif && hari === null && (
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-600">
+            Hari Minggu tidak ada jadwal kuliah reguler.
+          </div>
+        )}
+      </div>
+
+      {/* Grid Ruangan */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {ruang.map((r) => {
           const daftar = (pakai.get(r.id) ?? []).sort(
             (a, b) => a.jamMulai - b.jamMulai,
           );
           return (
-            <section key={r.id} className="rounded-xl border bg-white p-4">
-              <div className="flex items-baseline justify-between gap-2">
-                <h3 className="font-semibold">
-                  <Link href={`/ruang/${r.id}`} className="hover:underline">
-                    {r.nama}
-                  </Link>
-                </h3>
-                <span className="text-xs text-gray-500">
-                  {r.lantai !== null ? `Lantai ${r.lantai}` : ""}
-                  {r.kapasitas !== null ? ` · ${r.kapasitas} orang` : ""}
-                </span>
-              </div>
+            <Card
+              key={r.id}
+              className="flex flex-col justify-between transition"
+            >
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg font-bold ">
+                    <Link
+                      href={`/ruang/${r.id}`}
+                      className="transition hover:text-blue-600 hover:underline"
+                    >
+                      {r.nama}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="flex flex-wrap items-center gap-2 text-xs">
+                    {r.lantai !== null && (
+                      <span className="rounded bg-slate-100 px-2 py-0.5 font-medium">
+                        Lantai {r.lantai}
+                      </span>
+                    )}
+                    {r.kapasitas !== null && (
+                      <span>Kap. {r.kapasitas} orang</span>
+                    )}
+                  </CardDescription>
+                </div>
 
-              {daftar.length === 0 ? (
-                <p className="mt-2 text-sm text-green-700">
-                  Tidak ada penggunaan pada hari ini.
-                </p>
-              ) : (
-                <ul className="mt-1 divide-y">
-                  {daftar.map((p, i) => (
-                    <BarisPenggunaan key={i} p={p} />
-                  ))}
-                </ul>
-              )}
-            </section>
+                <CardAction>
+                  <Badge
+                    variant={daftar.length === 0 ? "outline" : "default"}
+                    className={
+                      daftar.length === 0
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
+                        : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50"
+                    }
+                  >
+                    {daftar.length === 0 ? "Kosong" : `${daftar.length} Sesi`}
+                  </Badge>
+                </CardAction>
+              </CardHeader>
+
+              <CardContent className="pt-0">
+                <div className="mb-3 border-t border-slate-100" />
+
+                {/* Daftar Sesi / Kosong */}
+                {daftar.length === 0 ? (
+                  <div className="flex h-20 items-center justify-center rounded-xl bg-slate-50 text-center">
+                    <p className="text-xs font-medium text-emerald-700">
+                      Tidak ada penggunaan pada hari ini.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-slate-100 text-sm">
+                    {daftar.map((p, i) => (
+                      <BarisPenggunaan key={i} p={p} />
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
       </div>
