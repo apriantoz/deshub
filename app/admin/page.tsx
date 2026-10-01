@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { cariPeriode } from "@/lib/periode";
 import {
   BarisPenggunaan,
   type Penggunaan,
@@ -35,11 +36,8 @@ export default async function Beranda({
     filter === "" ? true : filter === "LAB" ? r.jenis === "LAB" : r.jenis !== "LAB",
   );
 
-  const { data: aktif } = await supabase
-    .from("periode_akademik")
-    .select("id, tahun_ajaran, jenis")
-    .eq("aktif", true)
-    .maybeSingle();
+  // Periode yang berlaku pada tanggal yang dipilih (null kalau di luar semua periode)
+  const aktif = await cariPeriode(supabase, tanggal);
 
   const pakai = new Map<string, Penggunaan[]>();
   const tambah = (ruangId: string, p: Penggunaan) => {
@@ -150,7 +148,8 @@ export default async function Beranda({
 
       {!aktif && (
         <p className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
-          Belum ada periode akademik aktif, jadi hanya peminjaman yang ditampilkan.
+          Tanggal ini berada di luar periode akademik, jadi tidak ada jadwal kuliah
+          reguler dan hanya peminjaman yang ditampilkan.
         </p>
       )}
       {aktif && hari === null && (
